@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZOHAIB KHAN NETWORK | Ultimate Tools</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: black;
+            background-image: radial-gradient(#0f0 1px, transparent 1px);
+            background-size: 40px 40px;
+            font-family: 'Courier New', monospace;
+            color: #0f0;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .glitch {
+            font-size: 2.5rem;
+            text-align: center;
+            text-shadow: 0 0 5px #0f0;
+            animation: glitch 2s infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes glitch {
+            0%,100% { text-shadow: 0 0 5px #0f0; }
+            95% { text-shadow: -2px 0 red, 2px 0 blue; }
+            96% { text-shadow: 2px 0 red, -2px 0 blue; }
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #0f0;
+        }
+        .tab {
+            background: #020;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid #0f0;
+            border-bottom: none;
+        }
+        .tab.active {
+            background: #0f0;
+            color: black;
+        }
+        .panel {
+            display: none;
+            background: #0a0f0a;
+            border: 1px solid #2a4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .panel.active { display: block; }
+        input, select, textarea, button {
+            background: #111;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            font-family: monospace;
+        }
+        button { cursor: pointer; background: #020; }
+        button:hover { background: #0f0; color: black; }
+        .format-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .format-card {
+            background: #111;
+            border: 1px solid #0f0;
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 150px;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            background: #030;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+        .user-msg { color: #0af; margin: 5px 0; }
+        .ai-msg { color: #0f0; margin: 5px 0; border-left: 2px solid #0f0; padding-left: 10px; }
+        footer { text-align: center; margin-top: 30px; font-size: 0.7rem; color: #4a4; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="glitch">┌─┐┬ ┬┌─┐┌┐┌┌─┐  ┬┌─┐  ZOHAIB_KHAN_NETWORK</div>
+    <div class="tabs">
+        <div class="tab active" data-tab="yt">📹 YouTube Downloader</div>
+        <div class="tab" data-tab="ai">🤖 AI Chat (Multi-Model)</div>
+    </div>
+
+    <!-- YouTube Panel -->
+    <div id="ytPanel" class="panel active">
+        <h2>🔗 Enter YouTube URL</h2>
+        <input type="text" id="ytUrl" placeholder="https://youtube.com/watch?v=..." />
+        <button id="fetchBtn">Fetch Formats</button>
+        <div id="ytResult"></div>
+    </div>
+
+    <!-- AI Chat Panel -->
+    <div id="aiPanel" class="panel">
+        <h2>🧠 Select AI Model</h2>
+        <select id="modelSelect"></select>
+        <div id="chatMessages" class="chat-messages"></div>
+        <textarea id="chatInput" rows="2" placeholder="Ask anything..."></textarea>
+        <button id="sendBtn">Send Message</button>
+    </div>
+    <footer># Unlimited Credits | 320kbps Audio | 4K Video | ZOHAIB KHAN NETWORK</footer>
+</div>
+
+<script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(tab.dataset.tab + 'Panel').classList.add('active');
+        });
+    });
+
+    // YouTube Downloader
+    document.getElementById('fetchBtn').addEventListener('click', async () => {
+        const url = document.getElementById('ytUrl').value;
+        if (!url) return alert('Enter URL');
+        const resultDiv = document.getElementById('ytResult');
+        resultDiv.innerHTML = '<div class="loading">⏳ Fetching formats...</div>';
+        try {
+            const res = await fetch(`/api/youtube?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.error);
+            let html = `<h3>🎬 ${data.video.title}</h3><img src="${data.video.thumbnail}" style="max-width:200px"><br>`;
+            html += `<h4>Video Formats:</h4><div class="format-list">`;
+            data.formats.video.forEach(f => {
+                html += `<div class="format-card">
+                            📹 ${f.quality}<br>📦 ${f.extension}<br>💾 ${f.size}<br>
+                            <a href="${f.downloadUrl}" download target="_blank">Download</a>
+                         </div>`;
+            });
+            html += `</div><h4>Audio Formats:</h4><div class="format-list">`;
+            data.formats.audio.forEach(f => {
+                html += `<div class="format-card">
+                            🎵 ${f.quality}<br>📦 ${f.extension}<br>💾 ${f.size}<br>
+                            <a href="${f.downloadUrl}" download target="_blank">Download</a>
+                         </div>`;
+            });
+            html += `</div>`;
+            resultDiv.innerHTML = html;
+        } catch(e) {
+            resultDiv.innerHTML = `<div style="color:#f44">❌ Error: ${e.message}</div>`;
+        }
+    });
+
+    // AI Chat: load models
+    async function loadModels() {
+        const res = await fetch('/api/chat/models');
+        const data = await res.json();
+        const select = document.getElementById('modelSelect');
+        select.innerHTML = '';
+        data.models.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.name;
+            select.appendChild(opt);
+        });
+    }
+    loadModels();
+
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function addMessage(role, text) {
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'user-msg' : 'ai-msg';
+        div.innerHTML = `<strong>${role === 'user' ? 'You' : 'AI'}:</strong> ${text}`;
+        chatMessages.appendChild(div);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    sendBtn.addEventListener('click', async () => {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        addMessage('user', message);
+        chatInput.value = '';
+        const model = document.getElementById('modelSelect').value;
+        addMessage('ai', '⏳ Thinking...');
+        try {
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, model })
+            });
+            const data = await res.json();
+            // Remove last "Thinking..." message
+            chatMessages.removeChild(chatMessages.lastChild);
+            if (data.error) addMessage('ai', `❌ ${data.error}`);
+            else addMessage('ai', data.reply);
+        } catch(e) {
+            chatMessages.removeChild(chatMessages.lastChild);
+            addMessage('ai', `❌ Network error: ${e.message}`);
+        }
+    });
+</script>
+</body>
+  </html>
